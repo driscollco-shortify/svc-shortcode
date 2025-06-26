@@ -1,0 +1,132 @@
+name: Checks
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+env:
+  codeCoverageMinimum: 0
+
+jobs:
+  cache-go-deps:
+    name: Cache Go Modules
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.go-cache.outputs.cache-hit }}
+    steps:
+      - name: Set Github Access
+        run: git config --global url."https://${{ secrets.GH_TOKEN }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.2
+      - name: Clean Go module cache
+        run: go clean -modcache
+      - id: go-cache
+        name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Download Go Modules
+        run: go mod download
+
+  code-formatting:
+    name: Formatting
+    runs-on: ubuntu-latest
+    needs: cache-go-deps
+    steps:
+      - name: Set Github Access
+        run: git config --global url."https://${{ secrets.GH_TOKEN }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Formatting Check
+        run: make check-formatting
+
+  run-go-vet:
+    name: Go Vet
+    runs-on: ubuntu-latest
+    needs: cache-go-deps
+    steps:
+      - name: Set Github Access
+        run: git config --global url."https://${{ secrets.GH_TOKEN }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.2
+      - name: Clean Go module cache
+        run: go clean -modcache
+      - name: Restore Go Modules Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Go Vet
+        run: make govet
+
+  test-coverage:
+    name: Test Coverage
+    runs-on: ubuntu-latest
+    needs: cache-go-deps
+    steps:
+      - name: Set Github Access
+        run: git config --global url."https://${{ secrets.GH_TOKEN }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.2
+      - name: Clean Go module cache
+        run: go clean -modcache
+      - name: Restore Go Modules Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Test Coverage
+        run: make coverage
+
+  run-go-unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: cache-go-deps
+    steps:
+      - name: Set Github Access
+        run: git config --global url."https://${{ secrets.GH_TOKEN }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.2
+      - name: Clean Go module cache
+        run: go clean -modcache
+      - name: Restore Go Modules Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Unit Tests
+        run: make test

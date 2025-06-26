@@ -1,0 +1,49 @@
+GCP:
+  FireStore:
+    Paths:
+      ShortCodes: Live/ShortCodes
+      ShortCodesLegacy: Live/URLs
+      Stats: Live/Stats
+  ProjectId: shortify-pro
+Log:
+  Level: info
+CloudFlare:
+  Credentials:
+    ZoneId: c1ad7c0dd859ef38c9800604c7ca36f3
+Service:
+  Handlers:
+    Create:
+      Clicks:
+        Max: 9000
+      Domains:
+        - fd.ax
+        - ft.ax
+        - gx.ax
+        - hq.ax
+        - jx.ax
+        - nx.ax
+        - nw.ax
+        - sq.ax
+        - wx.ax
+      FlowClient:
+        RateLimitId: b169f660-be66-4148-9409-821cfebd8ed0
+        HardRateLimitId: cc7b1fba-6533-4e8f-9b55-c95af0b76da1
+        TargetId: 4865d5ba-2cf3-4da1-96c3-20c2ddb9cb8e
+      Lifetime:
+        Expiry: 4 Weeks
+      PubSub:
+        Topics:
+          Created: shortCode-created
+      ShortCode:
+        Length: 3
+Stats:
+  Year:
+    StartingDate: 2024-12-19
+Behaviours:
+  ShortCodes:
+    ExtendLifetime:
+      RemainingClicks:
+        TriggerPoint: 500
+        TopUp: 2000
+  SafeUrlChecks:
+    CheckInterval: 1 hour
